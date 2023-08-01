@@ -11,9 +11,9 @@ const rodoCheckbox = document.getElementById('rodoCheckbox');
 const sendRequest = document.getElementById('submit');
 
 
-let participantTable=[];  //tablica przechowująca obiekty kursant
+let participantTable=[];  //table
 
-//Inputy, z ktorych pobierane sa wartosci dla obiektu
+//Input of participant
 const participantFullname = document.getElementById('participantFullnameInput');
 const participantJob = document.getElementById('participantJobInput');
 const participantAge = document.getElementById('participantAgeInput');
@@ -32,15 +32,15 @@ document.addEventListener("DOMContentLoaded", () => {
                 age: participantAge.value
             }
 
-            //walidacja, sprawdza dla obiektow  czy powtarzają się opisy i nazwy. Jeżeli choć jedna rzecz się różni przechodzi dalej       
+            //Participant addition      
             for (let participant of participantTable) {
                 if (participant.name === participantFullname.value && participant.job === participantJob.value && participant.age === participantAge.value ) {
-                    alert('Nie można dodać tej samej osoby 2 raz!')
+                    alert('Erorr!')
                     return;
                 }
             }
 
-            participantTable.push(newParticipant); //dodawanie do tablicy participantTable obiektów participant
+            participantTable.push(newParticipant); //participant push
 
             participantFullname.value= "", 
             participantJob.value = "", 
@@ -49,7 +49,7 @@ document.addEventListener("DOMContentLoaded", () => {
             renderList();
             console.log(participantTable)
         }else{
-            alert("Wypełnij wymagane pola kursanta!")
+            alert("Complete the field!")
         }
     });
 })
@@ -107,7 +107,7 @@ const handleRodoCheckboxSwitch = () =>{
         if(paymentSwitch.checked){
             if(companyNIP.value.startsWith(" ") || companyNIP.value.length !== 10){
                 sendRequest.classList.add('disabled');  
-                alert("NIP firmy do faktury musi mieć 10 znaków!")
+                alert("Please fil the companyNIP!")
                 rodoCheckbox.checked = false;
             }
         }
@@ -152,13 +152,13 @@ $(document).ready(function(){
                     companyNIP:companyNIP},
                 dataType: 'JSON',
                 success: function(result) {
-                    console.log('wyslano dane! ', result);
-                    alert('Wysłano');
+                    console.log('Sent! ', result);
+                    alert('Sent');
 
                 },
                 error: function(log) {
                    console.log(log);
-                   $("#textAjax").text("Wysłano dane")
+                   $("#textAjax").text("Sent")
                 }
             })
     });
