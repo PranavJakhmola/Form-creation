@@ -1,52 +1,45 @@
  <?php
- use PHPMailer\PHPMailer\PHPMailer;
- use PHPMailer\PHPMailer\Exception;
- require("PHPMailer-master/src/Exception.php");
- require("PHPMailer-master/src/PHPMailer.php");
- require("PHPMailer-master/src/SMTP.php");
-
-
-
+ 
 	if (isset($_POST['courseName']) && isset($_POST['courseDate']) &&
         isset($_POST['applicantName'])&& isset($_POST['applicantEmail']) && isset($_POST['applicantAddress']) &&
         isset($_POST['applicantJob']) && isset($_POST['levelOfDifficulty'])) {
-        //dane kursu
+        //course
 		$courseName = $_POST['courseName'];
 		$courseDate = $_POST['courseDate'];
 		$levelOfDifficulty = $_POST['levelOfDifficulty'];
 
-		//dane zglaszajacego 
+		//applicant
 		$applicantName = $_POST['applicantName'];
 		$applicantAddress = $_POST['applicantAddress'];
 		$applicantJob = $_POST['applicantJob'];
 
-		//dane firmy do faktury
+		//company
 		$companyName = $_POST['companyName'];
 		$companyAddress = $_POST['companyAddress'];
 		$companyNIP = $_POST['companyNIP'];
 
-		//dane kursanta
+		//data
 		$data = $_POST['data'];
-		$participantArray = json_decode($data, true); //tablica kursantow
+		$participantArray = json_decode($data, true); //table
 	
 				
-		//Połączenie BD
+		//sql host connect
         $host = "localhost";
         $dbUsername = "root";
         $dbPassword = "";
-        $dbName = "kursbd";
+        $dbName = "work";
         $conn = mysqli_connect($host, $dbUsername, $dbPassword, $dbName);
 		if($conn->connect_error) {
             die('Could not connect to the database.');
         }
         else {
-		//Operacje na BD
-			$query2 = "INSERT INTO kurs(Nazwa, Data_rozpoczecia, Poziom_trudnosci) VALUES('$courseName', '$courseDate', '$levelOfDifficulty')";
+		// DB row
+			$query2 = "INSERT INTO course(courseName, courseData, levelofDifficulty) VALUES('$courseName', '$courseDate', '$levelOfDifficulty')";
 			$run = mysqli_query($conn, $query2) or die(mysqli_error($conn));
 
-			$latest_id =  mysqli_insert_id($conn);    //ostatnie id
+			$latest_id =  mysqli_insert_id($conn);    // id
 			
-			$query = "INSERT INTO zgloszenie(ID_kursu ,Imie_nazwisko, Adres, Stanowisko, Nazwa_firmy, Adres_firmy, NIP) VALUES($latest_id, '$applicantName', '$applicantAddress', '$applicantJob', '$companyName', '$companyAddress', '$companyNIP')";
+			$query = "INSERT INTO registration(ID ,applicantName,applicantaddress, applicantJob, companyName, companyAddress, companyNIP) VALUES($latest_id, '$applicantName', '$applicantAddress', '$applicantJob', '$companyName', '$companyAddress', '$companyNIP')";
 			$run2 = mysqli_query($conn, $query) or die(mysqli_error($conn));
 			
 			foreach($participantArray as $participant){
@@ -55,44 +48,18 @@
 				$participantJob = $participant['job'];
 				echo $participantName.' '.$participantAge.' '.$participantJob.'<br/>';
 
-				$run3 = mysqli_query($conn, "INSERT INTO kursant(ID_zgloszenia, Imie_nazwisko, Wiek, Stanowisko) VALUES($latest_id, '$participantName', '$participantAge', '$participantJob')")  or die(mysqli_error($conn));
+				$run3 = mysqli_query($conn, "INSERT INTO cadet(IDregister, participantName,participantAge, participantjob) VALUES($latest_id, '$participantName', '$participantAge', '$participantJob')")  or die(mysqli_error($conn));
 		  }
 
 			if($run &&$run2 && $run3){
-				echo "Dodano nowe rekordy do bazy danych! \n";
+				echo "Success! \n";
 			}
 			else{
-				echo "Wystąpił problem!";
+				echo "Error problem!";
 			}
 			mysqli_close($conn);
         }
 
-		//Wysylka maila
-		$mail = new PHPMailer;
-		$emailaddress = $_POST['applicantEmail'];
-		$fullname = $_POST['applicantName'];
-
-		$mail->From = $emailaddress;
-		$mail->FromName = $fullname;
-
-		$mail->addAddress("lisssu14@gmail.com", "Tomasz z BDG");
-
-
-		$mail->isHTML(true);
-
-		$mail->Subject = "Mail ze strony Interaktywny formularz";
-		$mail->Body = "<h1>Twoje zgłoszenie ma nr. $latest_id</h1>
-		<p>W Kurs: $courseName, dnia: $courseDate, poziom trudności: $levelOfDifficulty</p>";
-		if($mail->send()){
-		 	echo 'Message has been sent';
-		}
-		else{
-		 	echo 'Message could not be sent.';
-		 	echo 'Mailer Error: ' . $mail->ErrorInfo;
-		}
-    }
-    else {
-        echo "All field are required.";
-        die();
+		
     }
 ?> 
